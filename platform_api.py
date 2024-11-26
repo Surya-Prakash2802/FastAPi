@@ -49,6 +49,7 @@ async def post_data(data: Union[List[SensorDataIncoming], SensorDataIncoming]):
         
         # Prepare data to insert into Google Sheets
         values = []
+        jsonData = []
         for entry in data:
             # Convert ts to a readable timestamp in UTC
             timestamp = datetime.utcfromtimestamp(entry.ts / 1000).strftime("%m-%d-%Y %H:%M:%S") if entry.ts else ""
