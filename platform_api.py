@@ -65,7 +65,7 @@ async def post_data(data: Union[List[SensorDataIncoming], SensorDataIncoming]):
               "Data": sensor_data.data,
               "Decoded Data": data
             })
-            values.append([sensor_data.EUI, sensor_data.ts, sensor_data.data, timestamp,jsonData])
+            values.append([sensor_data.EUI, sensor_data.ts, sensor_data.data, timestamp, json.dumps(jsonData)])
 
         # Prepare body for API request
         body = {'values': values}
