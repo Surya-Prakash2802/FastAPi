@@ -83,6 +83,32 @@ async def post_data(data: Union[List[SensorDataIncoming], SensorDataIncoming]):
     except Exception as e:
         # Raise a 500 error with detailed information
         raise HTTPException(status_code=500, detail=f"Failed to add data: {str(e)}")
+        
+@app.get("/Sensor-data/")
+async def get_data():
+    try:
+        # Fetch data from Google Sheets
+        result = sheet.values().get(
+            spreadsheetId=SPREADSHEET_ID,
+            range=RANGE_NAME
+        ).execute()
+        
+        values = result.get('values', [])
+        
+        # Extract and parse JSON strings from column D (index 3)
+        json_data_list = []
+        for row in values:
+            if len(row) > 4:  # Ensure there are enough columns
+                json_string = row[4]  # Assuming column D is the fifth column (index 4)
+                try:
+                    json_data = json.loads(json_string)  # Parse the JSON string
+                    json_data_list.append(json_data)
+                except json.JSONDecodeError:
+                    continue  # Skip rows with invalid JSON
+
+        return {"status": "Data fetched successfully", "data": json_data_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch data: {str(e)}")
 
 def decode_uplink(input):
     decoded = {}
