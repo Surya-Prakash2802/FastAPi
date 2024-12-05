@@ -111,7 +111,7 @@ async def get_data():
         raise HTTPException(status_code=500, detail=f"Failed to fetch data: {str(e)}")
         
 @app.get("/Sensor-data/Sensor/")
-async def get_data(EUI:str, last: int = Query(1, ge=1, le=1000)):
+async def get_data(EUI: str, last: int = Query(1, ge=1, le=1000)):
     try:
         # Fetch data from Google Sheets
         result = sheet.values().get(
@@ -131,24 +131,18 @@ async def get_data(EUI:str, last: int = Query(1, ge=1, le=1000)):
                 if row_eui == EUI:  # Filter by EUI
                     try:
                         json_data = json.loads(json_string)  # Parse the JSON string
-                        filtered_data.append({
-                            "EUI": row_eui,
-                            "Timestamp": row[1],  # Assuming Timestamp is in the second column
-                            "Data": row[2],       # Assuming Data is in the third column
-                            "Updated_at": row[3], # Assuming Updated_at is in the fourth column
-                            "JSON": json_data
-                        })
+                        filtered_data.append(json_data)  # Append only the json_data
                     except json.JSONDecodeError:
                         continue  # Skip rows with invalid JSON
         
         # Sort by timestamp or updated_at if needed, then get the last 'n' entries
-        filtered_data.sort(key=lambda x: x["Timestamp"], reverse=True)
+        filtered_data.sort(key=lambda x: x["Timestamp"], reverse=True)  # Adjust sorting if necessary
         result_data = filtered_data[:last]
 
         return {"status": "Data fetched successfully", "data": result_data}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch data: {str(e)}")    
-    
+        raise HTTPException(status_code=500, detail=f"Failed to fetch data: {str(e)}")
+
 @app.get("/Sensor-data/range/")
 async def get_data_by_range(EUI: str, start: str, end: str):
     try:
@@ -175,19 +169,13 @@ async def get_data_by_range(EUI: str, start: str, end: str):
                 if row_eui == EUI and start_timestamp <= row_timestamp <= end_timestamp:  # Filter by EUI and timestamp range
                     try:
                         json_data = json.loads(json_string)  # Parse the JSON string
-                        filtered_data.append({
-                            "EUI": row_eui,
-                            "Timestamp": row[1],  # Assuming Timestamp is in the second column
-                            "Data": row[2],       # Assuming Data is in the third column
-                            "Updated_at": row[3], # Assuming Updated_at is in the fourth column
-                            "JSON": json_data
-                        })
+                        filtered_data.append(json_data)  # Append only the json_data
                     except json.JSONDecodeError:
                         continue  # Skip rows with invalid JSON
         
         return {"status": "Data fetched successfully", "data": filtered_data}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch data: {str(e)}")   
+        raise HTTPException(status_code=500, detail=f"Failed to fetch data: {str(e)}")
         
 
 def decode_uplink(input):
