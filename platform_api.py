@@ -131,12 +131,15 @@ async def get_data(EUI: str, last: int = Query(1, ge=1, le=1000)):
                 if row_eui == EUI:  # Filter by EUI
                     try:
                         json_data = json.loads(json_string)  # Parse the JSON string
+                        print(f"Parsed JSON data: {json_data}")  # Debugging line
                         filtered_data.append(json_data)  # Append only the json_data
                     except json.JSONDecodeError:
                         continue  # Skip rows with invalid JSON
         
         # Sort by timestamp or updated_at if needed, then get the last 'n' entries
-        filtered_data.sort(key=lambda x: x["Timestamp"], reverse=True)  # Adjust sorting if necessary
+        # Ensure json_data has a 'Timestamp' field if you are sorting by it
+        if filtered_data and isinstance(filtered_data[0], dict) and 'Timestamp' in filtered_data[0]:
+            filtered_data.sort(key=lambda x: x["Timestamp"], reverse=True)  # Adjust sorting if necessary
         result_data = filtered_data[:last]
 
         return {"status": "Data fetched successfully", "data": result_data}
