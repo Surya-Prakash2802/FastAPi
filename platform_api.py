@@ -136,17 +136,17 @@ async def get_data(EUI: str, last: int = Query(1, ge=1, le=1000)):
                     except json.JSONDecodeError:
                         continue  # Skip rows with invalid JSON
 
-        # Sort by timestamp if present and get the latest entry
+        # Sort by timestamp in ascending order (oldest first)
         if filtered_data and isinstance(filtered_data[0], dict) and 'Timestamp' in filtered_data[0]:
-            filtered_data.sort(key=lambda x: x["Timestamp"], reverse=True)  # Sort by Timestamp (latest first)
-        
-        # Return the latest entry or the first one after sorting
-        latest_data = filtered_data[0] if filtered_data else {}
+            filtered_data.sort(key=lambda x: x["Timestamp"], reverse=False)  # Sort in ascending order
 
-        return {"status": "Data fetched successfully", "data": latest_data}
+        # Return the last 'n' entries based on the 'last' parameter
+        result_data = filtered_data[-last:] if filtered_data else []
+
+        return {"status": "Data fetched successfully", "data": result_data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch data: {str(e)}")
-        
+
 @app.get("/Sensor-data/range/")
 async def get_data_by_range(EUI: str, start: str, end: str):
     try:
